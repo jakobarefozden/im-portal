@@ -69,14 +69,23 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-// Çok basit CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Geliştirme ortamında her yerden izin verelim
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
-		w.Header().Set("Vary", "Origin")
+
+		origin := r.Header.Get("Origin")
+
+		// Eğer isteğin Origin’i GitHub Pages ise izin ver
+		if origin == "https://jakobarefozden.github.io" ||
+			origin == "https://www.jakobarefozden.github.io" ||
+			origin == "http://localhost:5173" {
+
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+		}
+
+		// Gereken header'lar
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Vary", "Origin")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
