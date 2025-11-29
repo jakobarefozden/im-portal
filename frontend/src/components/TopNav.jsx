@@ -8,7 +8,7 @@ function TopNav() {
 
   return (
     <nav className="top-nav">
-      <NavLink to="/" className={linkClass} end>
+      <NavLink to="" className={linkClass} end>
         Hjem
       </NavLink>
       <NavLink to="/class/im-vg1" className={linkClass}>
