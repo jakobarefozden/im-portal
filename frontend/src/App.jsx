@@ -7,6 +7,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import CoursePage from "./pages/CoursePage";
 import ThemePage from "./pages/ThemePage";
 import SubThemePage from "./pages/SubThemePage";
+import PdfViewerPage from "./pages/PdfViewerPage";
+
 
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
         <Route path="/subtheme/:classId/:courseId/:themeId/:subId" element={<SubThemePage />} />
         <Route path="/blog" element={<BlogListPage />} />
         <Route path="*" element={<NotFoundPage />} />
+        <Route path="/viewer" element={<PdfViewerPage />} />
+
       </Routes>
     </MainLayout>
   );

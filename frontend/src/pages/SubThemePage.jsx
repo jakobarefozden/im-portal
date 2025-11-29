@@ -9,6 +9,7 @@ import {
 import { buildAssetUrl } from "../utils/url";
 
 
+
 function SubThemePage() {
   const { classId, courseId, themeId, subId } = useParams();
 
@@ -97,36 +98,53 @@ function SubThemePage() {
         </>
       )}
 
-      <h3 style={{ marginTop: "1.25rem" }}>Ressurser (PDF)</h3>
-      <ul>
-        {subtheme.notePdf && (
-          <li>
-            <a
-  href={buildAssetUrl(subtheme.notePdf)}
-  target="_blank"
-  rel="noreferrer"
->
+<h3 style={{ marginTop: "1.25rem" }}>Ressurser (PDF)</h3>
+<ul>
+  {subtheme.notePdf && (
+    <li>
+      <Link
+        to={`/viewer?file=${encodeURIComponent(subtheme.notePdf)}`}
+        className="link-as-button"
+      >
+        Åpne notater i visning
+      </Link>
+      {" "}
+      <a
+        href={buildAssetUrl(subtheme.notePdf)}
+        target="_blank"
+        rel="noreferrer"
+        style={{ marginLeft: "0.5rem", fontSize: "0.9rem" }}
+      >
+        (Last ned)
+      </a>
+    </li>
+  )}
 
-              Notater / presentasjon (PDF)
-            </a>
-          </li>
-        )}
-        {subtheme.tasksPdf && (
-          <li>
-            <a
-  href={buildAssetUrl(subtheme.tasksPdf)}
-  target="_blank"
-  rel="noreferrer"
->
+  {subtheme.tasksPdf && (
+    <li style={{ marginTop: "0.5rem" }}>
+      <Link
+        to={`/viewer?file=${encodeURIComponent(subtheme.tasksPdf)}`}
+        className="link-as-button"
+      >
+        Åpne oppgaver i visning
+      </Link>
+      {" "}
+      <a
+        href={buildAssetUrl(subtheme.tasksPdf)}
+        target="_blank"
+        rel="noreferrer"
+        style={{ marginLeft: "0.5rem", fontSize: "0.9rem" }}
+      >
+        (Last ned)
+      </a>
+    </li>
+  )}
 
-              Eksempeloppgaver (PDF)
-            </a>
-          </li>
-        )}
-        {!subtheme.notePdf && !subtheme.tasksPdf && (
-          <li>Ingen PDF-er registrert ennå.</li>
-        )}
-      </ul>
+  {!subtheme.notePdf && !subtheme.tasksPdf && (
+    <li>Ingen PDF-er registrert ennå.</li>
+  )}
+</ul>
+
 
       {subtheme.formUrl && subtheme.formUrl.trim() !== "" && (
         <>
