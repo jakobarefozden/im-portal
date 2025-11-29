@@ -30,6 +30,12 @@ func main() {
 		log.Fatalf("could not run migrations: %v", err)
 	}
 
+	// 🔐 Admin token (Render'da env var olarak ayarlayacağız)
+	adminToken := os.Getenv("ADMIN_TOKEN")
+	if adminToken == "" {
+		log.Println("WARNING: ADMIN_TOKEN is not set. Admin API will be disabled.")
+	}
+
 	r := chi.NewRouter()
 
 	// Orta katmanlar (log, recovery vs.)
@@ -46,7 +52,7 @@ func main() {
 	})
 
 	// API router'a repo ver
-	r.Mount("/api", apiRouter(repo))
+	r.Mount("/api", apiRouter(repo, adminToken))
 
 	// Statik dosyalar (pdf, img) için:
 	fileServer := http.FileServer(http.Dir("static"))

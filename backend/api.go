@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func apiRouter(repo *Repository) http.Handler {
+func apiRouter(repo *Repository, adminToken string) http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/classes", func(w http.ResponseWriter, r *http.Request) {
@@ -28,6 +28,15 @@ func apiRouter(repo *Repository) http.Handler {
 		handleGetSubTheme(w, r, repo)
 	})
 
+	// 🔐 Admin routes
+	r.Route("/admin", func(ar chi.Router) {
+		ar.Use(adminAuthMiddleware(adminToken))
+
+		// Subtheme create/update
+		ar.Post("/subthemes", func(w http.ResponseWriter, r *http.Request) {
+			handleUpsertSubTheme(w, r, repo)
+		})
+	})
 	return r
 }
 
@@ -115,4 +124,75 @@ func handleGetSubTheme(w http.ResponseWriter, r *http.Request, repo *Repository)
 		return
 	}
 	writeJSON(w, http.StatusOK, sub)
+}
+
+type SubThemeUpsertRequest struct {
+	ClassID   string   `json:"classId"`
+	CourseID  string   `json:"courseId"`
+	ThemeID   string   `json:"themeId"`
+	ID        string   `json:"id"`
+	Title     string   `json:"title"`
+	ShortDesc string   `json:"shortDescription"`
+	Desc      string   `json:"description"`
+	NotePDF   string   `json:"notePdf"`
+	TasksPDF  string   `json:"tasksPdf"`
+	FormURL   string   `json:"formUrl"`
+	Images    []string `json:"images"`
+}
+
+func handleUpsertSubTheme(w http.ResponseWriter, r *http.Request, repo *Repository) {
+	var req SubThemeUpsertRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+
+	if req.ClassID == "" || req.CourseID == "" || req.ThemeID == "" || req.ID == "" {
+		writeError(w, http.StatusBadRequest, "classId, courseId, themeId and id are required")
+		return
+	}
+
+	st := SubTheme{
+		ID:               req.ID,
+		Title:            req.Title,
+		ShortDescription: req.ShortDesc,
+		Description:      req.Desc,
+		NotePDF:          req.NotePDF,
+		TasksPDF:         req.TasksPDF,
+		FormURL:          req.FormURL,
+		Images:           req.Images,
+	}
+
+	if err := repo.UpsertSubTheme(req.ClassID, req.CourseID, req.ThemeID, &st); err != nil {
+		writeError(w, http.StatusInternalServerError, "could not save subtheme")
+		return
+	}
+
+	// Kayıt sonrası güncel halini döndür
+	saved, err := repo.GetSubTheme(req.ClassID, req.CourseID, req.ThemeID, req.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "saved but could not reload")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, saved)
+}
+
+func adminAuthMiddleware(adminToken string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if adminToken == "" {
+				writeError(w, http.StatusServiceUnavailable, "admin API not configured")
+				return
+			}
+
+			token := r.Header.Get("X-Admin-Token")
+			if token == "" || token != adminToken {
+				writeError(w, http.StatusUnauthorized, "unauthorized")
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }

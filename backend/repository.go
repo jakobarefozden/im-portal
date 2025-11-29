@@ -264,3 +264,35 @@ func (r *Repository) GetSubTheme(classID, courseID, themeID, subID string) (*Sub
 
 	return &s, nil
 }
+
+func (r *Repository) UpsertSubTheme(classID, courseID, themeID string, st *SubTheme) error {
+	// Images şu an DB'de yok, sadece alan olarak kalıyor
+	_, err := r.DB.Exec(`
+        INSERT INTO subthemes (
+            id, theme_id, course_id, class_id,
+            title, short_description, description,
+            note_pdf, tasks_pdf, form_url
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id, theme_id, course_id, class_id)
+        DO UPDATE SET
+            title = excluded.title,
+            short_description = excluded.short_description,
+            description = excluded.description,
+            note_pdf = excluded.note_pdf,
+            tasks_pdf = excluded.tasks_pdf,
+            form_url = excluded.form_url
+    `,
+		st.ID,
+		themeID,
+		courseID,
+		classID,
+		st.Title,
+		st.ShortDescription,
+		st.Description,
+		st.NotePDF,
+		st.TasksPDF,
+		st.FormURL,
+	)
+	return err
+}

@@ -8,6 +8,7 @@ import CoursePage from "./pages/CoursePage";
 import ThemePage from "./pages/ThemePage";
 import SubThemePage from "./pages/SubThemePage";
 import PdfViewerPage from "./pages/PdfViewerPage";
+import AdminSubThemePage from "./pages/AdminSubThemePage";
 
 
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/blog" element={<BlogListPage />} />
         <Route path="*" element={<NotFoundPage />} />
         <Route path="/viewer" element={<PdfViewerPage />} />
+        <Route path="/admin/subthemes" element={<AdminSubThemePage />} />
 
       </Routes>
     </MainLayout>
